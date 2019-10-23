@@ -1,0 +1,50 @@
+Your fruit stand company has some software that calculates and serves a list of products and their prices, taking into account items that are on sale and how the sales affect the total price. This software consists of three components: a base-price component which serves the base prices of fruits sold by the fruit stand, a sales component which provides a list of items that are on sale and how much each item is discounted, and a total-price component which communicates with the other two and calculates the final price for each item.
+
+These components have been running on a single Docker host, but as your business is expanding, it is time to upgrade to a swarm cluster for greater flexibility. Run these three application components as services in your swarm cluster, and provide them with a custom overlay network to facilitate isolated communication between them.
+
+Configure these application components on the Swarm cluster so that the following specifications are met:
+
+1. Create an overlay network called prices-overlay-net.
+2. Create a service called base-price with 3 replicas using the linuxacademycontent/prices-base-price:1 image. Configure the service to use the prices-overlay-net network.
+3. Create a service called sales with 3 replicas using the linuxacademycontent/prices-sales:1 image. Configure the service to use the prices-overlay-net network.
+4. Create a service called total-price with 2 replicas using the linuxacademycontent/prices-total-price:1 image. Configure the service to use the prices-overlay-net network.
+   Expose this service's port 80 on port 8080.
+
+If everything is set up correctly, you should be able to access the total prices list with:
+curl localhost:8080.
+
+
+Good luck!
+
+Solution:
+
+           1). Create an overlay network called prices-overlay-net.
+
+                  # First we have to create one swarm manager
+                     $ docker swarm init --advertise-addr 172.17.0.88
+                     $ docker swarm join --token SWMTKN-1-4ibcsewy1hekikztdr2r7xprzau27d1nfhx1detmp6j7f79fjt-9bmq1wlyb3x7000li9yerj93f 172.17.0.88:2377
+                  # So next we have to join with our worker by using above command to run
+                 
+                  $ docker network create -d overlay prices-overlay-net
+                   # created overlay network with name of prices-overlay-net
+                                        OR
+                  $ docker network create --driver prices-overlay-net.
+                  # To ceate overlay network need to specify the overlay driver when using docker network create command.
+
+           2). Create a service called base-price with 3 replicas using the linuxacademycontent/prices-base-price:1 image. Configure the service to use the prices-overlay-net network.
+              
+                 $ docker service create --name base-price --publish target=80,published=81 --replicas 3 --network prices-overlay-net linuxacademycontent/prices-base-price:1
+                  
+                 # created service like base-price with 3 replicas by using linuxacademycontent/prices-base-price:1 image.
+
+           3). Create a service called sales with 3 replicas using the linuxacademycontent/prices-sales:1 image. Configure the service to use the prices-overlay-net network.
+                 
+                 $ docker service create --name sales --publish target=80,published=82 --replicas=3 --network prices-overlay-net linuxacademycontent/prices-sales:1
+
+           4). Create a service called total-price with 2 replicas using the linuxacademycontent/prices-total-price:1 image. Configure the service to use the prices-overlay-net network.
+                Expose this service's port 80 on port 8080.
+
+                 $docker service create --name total-price --publish target=80,published=80 --replicas=2 --network prices-overlay-net linuxacademycontent/prices-total-price:1
+  
+            #After that we have to run in 8080 port will get all the toatl prices
+                  $curl http://172.17.0.88:8080
