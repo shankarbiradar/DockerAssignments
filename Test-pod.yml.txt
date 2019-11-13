@@ -1,0 +1,44 @@
+Step1: Created the YML file with required arguements.
+
+vi testpod.yml
+
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: test-pod
+  namespace: web
+  labels: 
+    app: my-app
+spec:
+  containers: 
+  - name: testcontainer
+    image: nginx
+    command:
+    - nginx
+    args:
+    - -g
+    - "daemon off;"
+    - -q
+    ports:
+
+    - containerPort: 80
+
+Step2: Created the namespace with name web
+       $ kubectl create namespace web
+       $ kubectl get namespace
+
+Step3: Created pod
+       $ kubectl create -f test1pod.yml
+       $ kubectl describe pod test-pod -n web
+       $ kubectl get pods -n web
+
+
+------------------------------------------------------------------------------------------
+master $ kubectl get pods -n web
+NAME       READY   STATUS    RESTARTS   AGE
+test-pod   1/1     Running   0          4m47s
+----------------------------------------------------------------------------------------------
+master $ kubectl get pods -n web
+NAME       READY   STATUS    RESTARTS   AGE
+test-pod   1/1     Running   0          4m47s
+
